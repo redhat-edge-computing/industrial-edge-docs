@@ -44,7 +44,7 @@ Once these steps have been executed, you will have all the infrastructure in pla
 
 This section describes all technical steps you need in order to deploy the whole solution based on the repositories hosted in the `redhat-edge-computing` Github org.
 
-# Prepare server/machine to perform deployment
+### Prepare server/machine to perform deployment
 
 We use a helper tool called `knictl` in order to render the blueprints. You first need to download and build this tool in your GOPATH:
 
@@ -71,7 +71,7 @@ Furthermore, our Industrial Edge Computing MVP performs CI/CD pipelining in orde
 }
 ```
 
-# Deploy Management Hub Blueprint
+### Deploy Management Hub Blueprint
 
 The site definition for the Management Hub Blueprint points to a GCP profile. This implies that first of all you need to have your Google Cloud Platform service account file located in the following path:
 
@@ -92,7 +92,7 @@ If everything goes well, the command will get out some instructions to deploy th
 Wait until the deployment is completed, and you will information about console endpoint, kubeadmin password and kubeconfig path.
 
 
-# Create NFS server, dynamic NFS provisioner and storage class
+### Create NFS server, dynamic NFS provisioner and storage class
 
 The solution/application this management hub cluster is going to run on top needs `ReadWriteMany` volumes. The default storage class does not support this type of volumes, so we are deploying the native NFS server from GCP, and adding a provisioner to claim volumes from it. We are working on avoiding this step.
 
@@ -112,7 +112,7 @@ The execution of this Ansible playbook creates a new default storage class, so w
 
 `oc patch storageclass standard -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'`
 
-# Day 2 operations in Management Hub cluster
+### Day 2 operations in Management Hub cluster
 
 Once we have the NFS server in place, plus the new provisioner as default storage class, we can now apply the Day 2 workloads that run on top of the management hub cluster such as Tekton, ArgoCD, ACM, etc.
 
@@ -121,7 +121,7 @@ Once we have the NFS server in place, plus the new provisioner as default storag
 This is basically running kustomize to build and render all the manifests enabling alpha plugins, and apply them via oc/kubectl.
 
 
-# Create kubeconfighub.json
+### Create kubeconfighub.json
 
 The Management Hub cluster runs the Red Hat's Advance Cluster Manager, and it has a list of three managed clusters preprovisioned. This will allow us to automatically register those three remote clusters into ACM once they are deployed. In order to perform this "self-registration" process, we need to encode in base64 the content of the kubeconfig file from the hub cluster and place it in `$HOME/.kni/kubeconfighub.json`. This can be achieved by executing the following command:
 
@@ -130,7 +130,7 @@ The Management Hub cluster runs the Red Hat's Advance Cluster Manager, and it ha
 Please, take into account the name/domain of your hub cluster in order to make this command work.
 
 
-# ACM Note
+### ACM Note
 
 The current version of ACM (2.0) has a known bug that is being resolved. The bug prevents to propagate the subscription properly when its channel is created simultaneously. In order to work around this issue, please, create a fake annotation to the following subscription:
 
@@ -141,17 +141,19 @@ And add something like:
 ```
     open-cluster-management.io/user-group: c3lzdGVtOm1hc3RlcnMsc3lzdGVtOmF1dGhlbnRpY2F0ZWQ=
     open-cluster-management.io/user-identity: c3lzdGVtOmFkbWlu
-    **test: fake**
+    test: fake
     creationTimestamp: "2020-09-21T10:36:26Z"
 
 ```
 
 
-# Deploy staging edge site on GCP
+### Deploy staging edge site on GCP
 
 Now all the required infrastructure is in place, we can deploy the staging-edge cluster on GCP based in the blueprint-industrial-edge repository. Please, check the following link to check instructions on how to deploy it:
 
 [https://github.com/redhat-edge-computing/blueprint-industrial-edge/tree/master/sites/staging-edge.gcp.devcluster.openshift.com](https://github.com/redhat-edge-computing/blueprint-industrial-edge/tree/master/sites/staging-edge.gcp.devcluster.openshift.com)
 
 
+### MANUela check points
 
+TBD
