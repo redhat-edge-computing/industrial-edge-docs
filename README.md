@@ -31,9 +31,9 @@ In order to test the whole solution, the following high level steps are required
       - OpenShift pipelines
       - ArgoCD Operator
 
-  2.- Provision NFS server for *ReadWriteMany* volumes: Temporary solution and add dynamic NFS provisioner as default storage class.
+  2.- Create `kubeconfighub.json` file with a base64 encoded version of the kubeconfig file from the recently deployed cluster (`base64 -w0 $HOME/.kni/edge-mgmt-hub.gcp.devcluster.openshift.com/final_manifests/auth/kubeconfig > $HOME/.kni/kubeconfighub.json`)
 
-  3.- Create `kubeconfighub.json` file with a base64 encoded version of the kubeconfig file from the recently deployed cluster (`base64 -w0 $HOME/.kni/edge-mgmt-hub.gcp.devcluster.openshift.com/final_manifests/auth/kubeconfig > $HOME/.kni/kubeconfighub.json`)
+  3.- Workaround due to ACM bug. Please, check out the ACM note section at the end of this document. 
 
   4.- Deploy Edge Computing cluster and workloads running on top.
 
@@ -91,30 +91,9 @@ If everything goes well, the command will get out some instructions to deploy th
 
 Wait until the deployment is completed, and you will information about console endpoint, kubeadmin password and kubeconfig path.
 
-
-### Create NFS server, dynamic NFS provisioner and storage class
-
-The solution/application this management hub cluster is going to run on top needs `ReadWriteMany` volumes. The default storage class does not support this type of volumes, so we are deploying the native NFS server from GCP, and adding a provisioner to claim volumes from it. We are working on avoiding this step.
-
-Go to the Google Cloud Platform console with your account and search the filestore section: [https://console.cloud.google.com/filestore](https://console.cloud.google.com/filestore)
-
-There, you can use the wizard to create a filestore with most of the default parameters. Just take into account that you need to pick the right VPC network (where the OpenShift cluster VMs are running) and for the sake of performance, choose the same region/zone as the cluster.
-
-After a couple of minutes, you will get the filestore created and an endpoint (IP:/nfs-volume). Please, keep this in mind for the next step.
-
-Now it's time to create the NFS provisioner on the cluster. For this, we have written an Ansible playbook to automate the creation:
-
-
-TBD
-
-
-The execution of this Ansible playbook creates a new default storage class, so we have to remove the annotation default from the standard storage class:
-
-`oc patch storageclass standard -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'`
-
 ### Day 2 operations in Management Hub cluster
 
-Once we have the NFS server in place, plus the new provisioner as default storage class, we can now apply the Day 2 workloads that run on top of the management hub cluster such as Tekton, ArgoCD, ACM, etc.
+Once we have the cluster up and running, we can now apply the Day 2 workloads that run on top of the management hub cluster such as Tekton, ArgoCD, ACM, etc.
 
 `knictl apply_workloads edge-mgmt-hub.gcp.devcluster.openshift.com`
 
