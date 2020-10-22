@@ -100,6 +100,27 @@ Once we have the cluster up and running, we can now apply the Day 2 workloads th
 This is basically running kustomize to build and render all the manifests enabling alpha plugins, and apply them via oc/kubectl.
 
 
+### Run Seed Pipelines
+
+The following commands will run 4 pipelines in order to build container images and feed the configuration in order to make the pods from the manuela-tst-all namespace work as expected.
+
+
+```
+oc apply -f ~/.kni/edge-mgmt-hub.gcp.devcluster.openshift.com/blueprint/base/03_services/tekton/seed-iot-anomaly-detection-run.yaml -n manuela-ci
+
+(wait till the pipelinerun is finished)
+
+oc apply -f ~/.kni/edge-mgmt-hub.gcp.devcluster.openshift.com/blueprint/base/03_services/tekton/seed-iot-consumer-run.yaml -n manuela-ci
+
+(wait till the pipelinerun is finished)
+
+oc apply -f ~/.kni/edge-mgmt-hub.gcp.devcluster.openshift.com/blueprint/base/03_services/tekton/seed-iot-frontend-run.yaml -n manuela-ci
+
+(wait till the pipelinerun is finished)
+
+oc apply -f ~/.kni/edge-mgmt-hub.gcp.devcluster.openshift.com/blueprint/base/03_services/tekton/seed-iot-software-sensor-run.yaml -n manuela-ci
+```
+
 ### Create kubeconfighub.json
 
 The Management Hub cluster runs the Red Hat's Advance Cluster Manager, and it has a list of three managed clusters preprovisioned. This will allow us to automatically register those three remote clusters into ACM once they are deployed. In order to perform this "self-registration" process, we need to encode in base64 the content of the kubeconfig file from the hub cluster and place it in `$HOME/.kni/kubeconfighub.json`. This can be achieved by executing the following command:
@@ -135,4 +156,18 @@ Now all the required infrastructure is in place, we can deploy the staging-edge 
 
 ### MANUela check points
 
-TBD
+
+#### Use Cases / Demo Modules
+
+Once the management hub cluster and the staging cluster running on GCP are up and running, the platform is ready to perform some demo flows that will show how we can manage clusters and applications in the edge using gitops. 
+
+- GitOps app deployment [preparation](./docs/module-app-deployment.md#Demo-preparation) - [demo execution](./docs/module-app-deployment.md#Demo-execution)
+- GitOps configuration management [preparation](./docs/module-configuration-management.md#Demo-preparation) - [demo execution](./docs/module-configuration-management.md#Demo-execution)
+- Code change [preparation](./docs/module-code-change.md#Demo-preparation) - [demo execution](./docs/module-code-change.md#demo-execution)
+-  CI/CD pipeline & GitOps staging [preparation](./docs/module-ci-cd-pipeline.md#Demo-preparation) - [demo execution](./docs/module-ci-cd-pipeline.md#Demo-execution)
+- Event streaming from edge to core & filling the data lake [preparation](./docs/module-event-streaming.md#Demo-preparation) - [demo execution](./docs/module-event-streaming.md#Demo-execution)
+- Machine learning [preparation](./docs/module-machine-learning.md#Demo-preparation) - [demo execution](./docs/module-machine-learning.md#Demo-execution)
+- Infrastructure operator development [preparation](./docs/module-infrastructure-operator-development.md#Demo-preparation) - [demo execution](./docs/module-infrastructure-operator-development.md#Demo-execution)
+- Enterprise Container [preparation](./docs/module-enterprise-container.md#Demo-preparation) - [demo execution](./docs/module-enterprise-container.md#Demo-execution)
+- Multi Cluster Management [preparation](./docs/module-multicluster.md#Demo-preparation) - [demo execution](./docs/module-multicluster.md#Demo-execution)
+
