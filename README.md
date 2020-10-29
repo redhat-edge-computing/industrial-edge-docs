@@ -24,6 +24,8 @@ See [link to architecture diagrams and explanation] for a detailed deployment ar
 
 It should look like this:
 
+![alt text](images/github.png "Github org with forked repos")
+
 
 ### Adding Keys and Tokens
 
@@ -84,9 +86,16 @@ Ensure that account meets the requirements in the [OpenShift documentation for i
 
 You need to create a robot account and get the following token:
 
+![alt text](images/robot.png "Robot account")
+
 Set write permissions to all four repositories:
 
+![alt text](images/permissions.png "Add write permissions")
+
+
 Finally, copy the value of the .dockerconfigjson key in the Kubernetes secret and place it in $HOME/.kni/dockerconfig.json:
+
+![alt text](images/secret.png "Copy dockerconfig")
 
 
 ### Adapting to Your Environment
@@ -207,6 +216,8 @@ $  oc apply -f ~/.kni/edge-mgmt-hub.gcp.devcluster.openshift.com/blueprint/base/
 
 The final result should look like this in the OpenShift console:
 
+![alt text](images/seed.png "Seed pipelines")
+
 
 ### Verifying and Troubleshooting the ACM Subscriptions
 
@@ -283,4 +294,8 @@ Once the management hub and factory edge clusters are up and running, the platfo
 - CI/CD pipeline & GitOps staging [preparation](https://github.com/redhat-edge-computing/industrial-edge-docs/blob/master/docs/module-ci-cd-pipeline.md#Demo-preparation) - [demo execution](https://github.com/redhat-edge-computing/industrial-edge-docs/blob/master/docs/module-ci-cd-pipeline.md#demo-execution)
 - Event streaming from edge to core & filling the data lake [preparation](https://github.com/redhat-edge-computing/industrial-edge-docs/blob/master/docs/module-event-streaming.md#Demo-preparation) - [demo execution](https://github.com/redhat-edge-computing/industrial-edge-docs/blob/master/docs/module-event-streaming.md#demo-execution)
 - Machine learning [preparation](https://github.com/redhat-edge-computing/industrial-edge-docs/blob/master/docs/module-machine-learning.md#Demo-preparation) - [demo execution](https://github.com/redhat-edge-computing/industrial-edge-docs/blob/master/docs/module-machine-learning.md#demo-execution)
+
+
+![alt text](images/dashboard.png "IoT Dashboard")
+
 
