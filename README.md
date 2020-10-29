@@ -103,7 +103,7 @@ Finally, copy the value of the .dockerconfigjson key in the Kubernetes secret an
 Execute the following commands to clone the four forked repositories and replace the variables to adapt the blueprints to your own environment:
 
 ```
-export MYGITHUBORG=your_github_org_name_here
+$ export MYGITHUBORG=your_github_org_name_here
 $ export MYQUAYORG=your_quay_org_name_here
 $ export MGMT_HUB=your_name_and_domain_for_hub_cluster
 $ export FACTORY=your_name_and_domain_for_factory_cluster
@@ -139,7 +139,7 @@ $ cat <<EOF >manuela-gitops/config/instances/manuela-data-lake/factory-mirror-ma
 apiVersion: v1
 kind: Secret
 metadata:
-  name: kafka-tls-certificate-and-key
+  name: kafka-tls-certificate
 data:
   tls.crt: $(base64 -w0 <certificate.pem)
 EOF
@@ -160,7 +160,7 @@ $ export REPOS=("blueprint-management-hub" "blueprint-industrial-edge" "manuela-
 for r in ${REPOS[@]}; do
     pushd $r >/dev/null
     git add .
-    git commit -m “Customize URLs and update certificates”
+    git commit -m "Customize URLs and update certificates"
     git push origin master
     popd >/dev/null
 done
