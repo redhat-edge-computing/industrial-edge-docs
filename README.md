@@ -189,7 +189,16 @@ Start by deploying the management hub:
 $ podman run --rm \
 -v $HOME/.gcp:/root/.gcp:ro \
 -v $HOME/.kni:/root/.kni \
-quay.io/redhat-edge-computing/kni-install:latest create cluster --site-repo github.com/monkey-the-user/blueprint-management-hub/sites/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN/
+quay.io/redhat-edge-computing/kni-install:latest create cluster --site-repo github.com/$MYGITHUBORG/blueprint-management-hub/sites/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN/
+```
+
+Ensure all workloads have been applied:
+
+```
+$ podman run --rm \
+-v $HOME/.gcp:/root/.gcp:ro \
+-v $HOME/.kni:/root/.kni \
+quay.io/redhat-edge-computing/kni-install:latest create workloads --site-repo github.com/$MYGITHUBORG/blueprint-management-hub/sites/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN/
 ```
 
 Once the deployment has finished and the workloads have been deployed, you can find the management hub credentials in the following folder:
@@ -285,7 +294,7 @@ Now you can deploy the factory edge site:
 $ podman run --rm \
 -v $HOME/.gcp:/root/.gcp:ro \
 -v $HOME/.kni:/root/.kni \
-quay.io/redhat-edge-computing/kni-install:latest create cluster --site-repo github.com/monkey-the-user/blueprint-industrial-edge/sites/$EDGE_SITE_NAME.$EDGE_SITE_DOMAIN/
+quay.io/redhat-edge-computing/kni-install:latest create cluster --site-repo github.com/$MYGITHUBORG/blueprint-industrial-edge/sites/$EDGE_SITE_NAME.$EDGE_SITE_DOMAIN/
 ```
 
 Once the deployment has finished, ensure all workloads have been applied:
@@ -294,7 +303,7 @@ Once the deployment has finished, ensure all workloads have been applied:
 $ podman run --rm \
 -v $HOME/.gcp:/root/.gcp:ro \
 -v $HOME/.kni:/root/.kni \
-quay.io/redhat-edge-computing/kni-install:latest create workloads --site-repo github.com/monkey-the-user/blueprint-industrial-edge/sites/$EDGE_SITE_NAME.$EDGE_SITE_DOMAIN/
+quay.io/redhat-edge-computing/kni-install:latest create workloads --site-repo github.com/$MYGITHUBORG/blueprint-industrial-edge/sites/$EDGE_SITE_NAME.$EDGE_SITE_DOMAIN/
 ```
 
 ### Using the Blueprint
