@@ -118,13 +118,11 @@ $ for r in ${REPOS[@]}; do
         -e "s/staging-edge.gcp.devcluster.openshift.com/$FACTORY/g" \
         {} \;
 done
-
 ```
 
 Generate new TLS certificates matching your environment:
 
 ```
-
 $ openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem -subj "/C=DE/OU=Manuela/CN=*.apps.${MGMT_HUB}"
 
 $ cat <<EOF >manuela-gitops/config/instances/manuela-data-lake/central-kafka-cluster/kafka-tls-certificate-and-key.yaml
@@ -205,9 +203,11 @@ $  oc apply -f ~/.kni/edge-mgmt-hub.gcp.devcluster.openshift.com/blueprint/base/
 ```
 
 Wait for the pipeline run to finish, then run:
+
 ```
 $  oc apply -f ~/.kni/edge-mgmt-hub.gcp.devcluster.openshift.com/blueprint/base/03_services/tekton/seed-iot-frontend-run.yaml -n manuela-ci
 ```
+
 Wait for the pipeline run to finish, then run:
 
 ```
@@ -239,7 +239,6 @@ open-cluster-management   kui-web-terminal-sub       Subscribed          24m
 If the argocd-sub subscription is in PropagationFailed state, add a fake annotation to the object to trigger an update of the ArgoCD subscription:
 
 ```
-
 $ oc edit appsub argocd-sub -n argocd
 apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
