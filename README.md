@@ -105,8 +105,10 @@ Execute the following commands to clone the four forked repositories and replace
 ```
 $ export MYGITHUBORG=your_github_org_name_here
 $ export MYQUAYORG=your_quay_org_name_here
-$ export MGMT_HUB=your_name_and_domain_for_hub_cluster
-$ export FACTORY=your_name_and_domain_for_factory_cluster
+$ export MGMT_HUB_NAME=your_mgmt_hub_cluster_name
+$ export MGMT_HUB_DOMAIN=your_mgmt_hub_cluster_domain
+$ export EDGE_SITE_NAME=your_edge_cluster_name
+$ export EDGE_SITE_DOMAIN=your_edge_cluster_domain
 
 $ export REPOS=("blueprint-management-hub" "blueprint-industrial-edge" "manuela-gitops")
 $ for r in ${REPOS[@]}; do
@@ -114,16 +116,18 @@ $ for r in ${REPOS[@]}; do
     find $r -not \( -path $r/.git -prune \) -type f -exec sed -i \
         -e "s/github.com\/redhat-edge-computing/github.com\/$MYGITHUBORG/g" \
         -e "s/quay.io\/redhat-edge-computing/quay.io\/$MYQUAYORG/g" \
-        -e "s/edge-mgmt-hub.gcp.devcluster.openshift.com/$MGMT_HUB/g" \
-        -e "s/staging-edge.gcp.devcluster.openshift.com/$FACTORY/g" \
+        -e "s/edge-mgmt-hub.gcp.devcluster.openshift.com/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN/g" \
+        -e "s/staging-edge.gcp.devcluster.openshift.com/$EDGE_NAME.$EDGE_DOMAIN/g" \
         {} \;
 done
+
+
 ```
 
 Generate new TLS certificates matching your environment:
 
 ```
-$ openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem -subj "/C=DE/OU=Manuela/CN=*.apps.${MGMT_HUB}"
+$ openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem -subj "/C=DE/OU=Manuela/CN=*.apps.$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN"
 
 $ cat <<EOF >manuela-gitops/config/instances/manuela-data-lake/central-kafka-cluster/kafka-tls-certificate-and-key.yaml
 apiVersion: v1
@@ -147,10 +151,19 @@ EOF
 
 Change name and domain of your clusters:
 
-- https://github.com/redhat-edge-computing/blueprint-management-hub/blob/master/sites/edge-mgmt-hub.gcp.devcluster.openshift.com/00_install-config/install-config.name.patch.yaml#L3
-- https://github.com/redhat-edge-computing/blueprint-management-hub/blob/master/sites/edge-mgmt-hub.gcp.devcluster.openshift.com/00_install-config/install-config.patch.yaml#L5
-- https://github.com/redhat-edge-computing/blueprint-industrial-edge/blob/master/sites/staging-edge.gcp.devcluster.openshift.com/00_install-config/install-config.name.patch.yaml#L3
-- https://github.com/redhat-edge-computing/blueprint-industrial-edge/blob/master/sites/staging-edge.gcp.devcluster.openshift.com/00_install-config/install-config.patch.yaml#L5
+```
+$ pushd blueprint-management-hub >/dev/null
+$ git mv sites/edge-mgmt-hub.gcp.devcluster.openshift.com sites/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN
+$ sed -i -e "s|gcp.devcluster.openshift.com|$MGMT_HUB_DOMAIN|g" sites/$MGMT_HUB/00_install-config/install-config.patch.yaml
+$ sed -i -e "s|edge-mgmt-hub|$MGMT_HUB_NAME|g" sites/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN/00_install-config/install-config.name.patch.yaml
+$ popd >/dev/null
+
+$ pushd blueprint-industrial-edge >/dev/null
+$ git mv sites/staging-edge.gcp.devcluster.openshift.com sites/$EDGE_SITE_NAME.$EDGE_SITE_DOMAIN
+$ sed -i -e "s|gcp.devcluster.openshift.com|$EDGE_SITE_DOMAIN|g" sites/$EDGE_SITE_NAME.$EDGE_SITE_DOMAIN/00_install-config/install-config.patch.yaml
+$ sed -i -e "s|staging-edge|$EDGE_SITE_NAME|g" sites/$EDGE_SITE_NAME.$EDGE_SITE_DOMAIN/00_install-config/install-config.name.patch.yaml
+$ popd >/dev/null
+```
 
 
 Push the changes back to GitHub:
@@ -176,13 +189,13 @@ Start by deploying the management hub:
 $ podman run --rm \
 -v $HOME/.gcp:/root/.gcp:ro \
 -v $HOME/.kni:/root/.kni \
-quay.io/redhat-edge-computing/kni-install:latest create cluster --site-repo github.com/monkey-the-user/blueprint-management-hub/sites/edge-mgmt-hub.gcp.devcluster.openshift.com/
+quay.io/redhat-edge-computing/kni-install:latest create cluster --site-repo github.com/monkey-the-user/blueprint-management-hub/sites/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN/
 ```
 
 Once the deployment has finished and the workloads have been deployed, you can find the management hub credentials in the following folder:
 
 ```
-$  ls ~/.kni/edge-mgmt-hub.gcp.devcluster.openshift.com/final_manifests/auth/
+$  ls ~/.kni/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN/final_manifests/auth/
 kubeadmin-password  kubeconfig
 ```
 
@@ -193,25 +206,25 @@ The following commands will run 4 pipelines in order to build container images a
 Run:
 
 ```
-$  oc apply -f ~/.kni/edge-mgmt-hub.gcp.devcluster.openshift.com/blueprint/base/03_services/tekton/seed-iot-anomaly-detection-run.yaml -n manuela-ci
+$  oc apply -f ~/.kni/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN/blueprint/base/03_services/tekton/seed-iot-anomaly-detection-run.yaml -n manuela-ci
 ```
 
 Wait for the pipeline run to finish, then run:
 
 ```
-$  oc apply -f ~/.kni/edge-mgmt-hub.gcp.devcluster.openshift.com/blueprint/base/03_services/tekton/seed-iot-consumer-run.yaml -n manuela-ci
+$  oc apply -f ~/.kni/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN/blueprint/base/03_services/tekton/seed-iot-consumer-run.yaml -n manuela-ci
 ```
 
 Wait for the pipeline run to finish, then run:
 
 ```
-$  oc apply -f ~/.kni/edge-mgmt-hub.gcp.devcluster.openshift.com/blueprint/base/03_services/tekton/seed-iot-frontend-run.yaml -n manuela-ci
+$  oc apply -f ~/.kni/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN/blueprint/base/03_services/tekton/seed-iot-frontend-run.yaml -n manuela-ci
 ```
 
 Wait for the pipeline run to finish, then run:
 
 ```
-$  oc apply -f ~/.kni/edge-mgmt-hub.gcp.devcluster.openshift.com/blueprint/base/03_services/tekton/seed-iot-software-sensor-run.yaml -n manuela-ci
+$  oc apply -f ~/.kni/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN/blueprint/base/03_services/tekton/seed-iot-software-sensor-run.yaml -n manuela-ci
 ```
 
 The final result should look like this in the OpenShift console:
@@ -263,7 +276,7 @@ metadata:
 The Management Hub cluster runs Red Hat's Advance Cluster Manager which has a list of three managed clusters preprovisioned. This will allow us to automatically register those three remote clusters into ACM once they are deployed. To perform this "self-registration" process, base64-encode the content of the management hub’s kubeconfig file and place it in $HOME/.kni/kubeconfighub.json:
 
 ```
-$  base64 -w0 $HOME/.kni/edge-mgmt-hub.gcp.devcluster.openshift.com/final_manifests/auth/kubeconfig > $HOME/.kni/kubeconfighub.json
+$  base64 -w0 $HOME/.kni/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN/final_manifests/auth/kubeconfig > $HOME/.kni/kubeconfighub.json
 ```
 
 Now you can deploy the factory edge site:
@@ -272,7 +285,7 @@ Now you can deploy the factory edge site:
 $ podman run --rm \
 -v $HOME/.gcp:/root/.gcp:ro \
 -v $HOME/.kni:/root/.kni \
-quay.io/redhat-edge-computing/kni-install:latest create cluster --site-repo github.com/monkey-the-user/blueprint-industrial-edge/sites/staging-edge.gcp.devcluster.openshift.com/
+quay.io/redhat-edge-computing/kni-install:latest create cluster --site-repo github.com/monkey-the-user/blueprint-industrial-edge/sites/$EDGE_SITE_NAME.$EDGE_SITE_DOMAIN/
 ```
 
 Once the deployment has finished, ensure all workloads have been applied:
@@ -281,7 +294,7 @@ Once the deployment has finished, ensure all workloads have been applied:
 $ podman run --rm \
 -v $HOME/.gcp:/root/.gcp:ro \
 -v $HOME/.kni:/root/.kni \
-quay.io/redhat-edge-computing/kni-install:latest create workloads --site-repo github.com/monkey-the-user/blueprint-industrial-edge/sites/staging-edge.gcp.devcluster.openshift.com/
+quay.io/redhat-edge-computing/kni-install:latest create workloads --site-repo github.com/monkey-the-user/blueprint-industrial-edge/sites/$EDGE_SITE_NAME.$EDGE_SITE_DOMAIN/
 ```
 
 ### Using the Blueprint
