@@ -18,7 +18,7 @@ See [link to architecture diagrams and explanation] for a detailed deployment ar
 [Fork](https://docs.github.com/en/free-pro-team@latest/github/getting-started-with-github/fork-a-repo) the following repos into your own GitHub org:
 
 - https://github.com/redhat-edge-computing/blueprint-management-hub
-- https://github.com/redhat-edge-computing/blueprint-industrial-edge- 
+- https://github.com/redhat-edge-computing/blueprint-industrial-edge
 - https://github.com/redhat-edge-computing/manuela-gitops
 - https://github.com/redhat-edge-computing/manuela-dev
 
