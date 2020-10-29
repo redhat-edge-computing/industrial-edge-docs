@@ -7,6 +7,8 @@ Red Hat’s edge computing blueprints are repositories of configuration template
 This “AI/ML Industrial Edge” blueprint demonstrates using OpenShift, ACM, AMQ Streams, OpenDataHub, and other products from Red Hat’s portfolio to address a common edge computing use case commonly found in manufacturing:
 Machine inference-based anomaly detection on metric time-series sensor data at the edge, with a central data lake and ML model retraining.
 
+![alt text](images/overview.png "AI/ML Industrial Edge Overview")
+
 [add high level overview figure plus brief explanation: multiple factory edges, central mgmt and data lake on public cloud]
 See [link to architecture diagrams and explanation] for a detailed deployment architecture explaining what will be deployed where.
 
