@@ -3,27 +3,40 @@
 # Gitops Configuration Management  <!-- omit in toc -->
 This document describes how to prepare & execute the  gitops config management demo
 
-- [Prerequisites](#Prerequisites)
-- [Demo Preparation](#Demo-Preparation)
-  - [Disable temperature in sensor 2 / revert to default (which is disabled)](#Disable-temperature-in-sensor-2--revert-to-default-which-is-disabled)
-  - [Sync ArgoCD](#Sync-ArgoCD)
-- [Demo Execution](#Demo-Execution)
-  - [Show that Sensor 2 currently does not send temperature data in Frontend Application](#Show-that-Sensor-2-currently-does-not-send-temperature-data-in-Frontend-Application)
-  - [Wait for ArgoCD to sync application / trigger sync for machine-sensor](#Wait-for-ArgoCD-to-sync-application--trigger-sync-for-machine-sensor)
-  - [Show that sensor now sends configuration data](#Show-that-sensor-now-sends-configuration-data)
-  - [Review Change History](#Review-Change-History)
+- [Prerequisites](#prerequisites)
+- [Demo Preparation](#demo-preparation)
+  - [Disable temperature in sensor 2 / revert to default (which is disabled)](#disable-temperature-in-sensor-2--revert-to-default-which-is-disabled)
+  - [Sync ArgoCD](#sync-argocd)
+- [Demo Execution](#demo-execution)
+  - [Show that Sensor 2 currently does not send temperature data in IoT dashboard](#show-that-sensor-2-currently-does-not-send-temperature-data-in-iot-dashboard)
+  - [Wait for ArgoCD to sync application / trigger sync for machine-sensor](#wait-for-argocd-to-sync-application--trigger-sync-for-machine-sensor)
+  - [Show that sensor now sends temperature data](#show-that-sensor-now-sends-temperature-data)
 
 ## Prerequisites
 
-The demo environment(s) have been [bootstrapped](BOOTSTRAP.md).
 
-This demo module is a continuation of the [basic gitops application deployment module](module-app-deployment.md). It can be prepared independently, but needs to be executed after it.
+The management hub and factory edge clusters are up and running, sensor data is flowing into the IoT dashboard.
+During the deployment you forked and cloned manuela-gitops on your local machine.
+
+
+To open the IoT dashbaord, either login into the OpenShift console of you factory edge clusters and navigate to the ```line-dashboard``` route in the ```manuela-stormshift-line-dashboard``` namespace or logon via ```oc``` cli into the  edge OpenShift clusters and call
+
+```
+echo http://$(oc get route line-dashboard -o jsonpath='{.spec.host}' -n manuela-stormshift-line-dashboard )
+```
+
+The dashboard should show three metrics:
+![image alt text](images/line-dashboard-3-metrics.png)
+
+In case you see four metrics, revert to default (see below)
+
+
 
 ## Demo Preparation
 
 ### Disable temperature in sensor 2 / revert to default (which is disabled)
 ```bash
-cd ~/manuela-gitops/config/instances/manuela-<yourenv>/machine-sensor
+cd ~/manuela-gitops/config/instances/manuela-stormshift-staging-gcp/machine-sensor/
 ```
 
 OSX
@@ -46,48 +59,41 @@ git push
 
 This should happen automatically, but can be triggered through the ArgoCD UI and/or CLI
 
-![image alt text](images/image_8.png)
+![image alt text](images/argocd-sensor.png)
 
-![image alt text](images/image_9.png)
+
 
 ## Demo Execution
 
-### Show that Sensor 2 currently does not send temperature data in Frontend Application
+### Show that Sensor 2 currently does not send temperature data in IoT dashboard
+![image alt text](images/line-dashboard-3-metrics.png)
 
-<TBD Frontend Application>
 
 Adapt Application Instance configuration
-```bash
-cd ~/manuela-gitops/config/instances/manuela-<yourexecenv>/machine-sensor
-echo "SENSOR_TEMPERATURE_ENABLED=true" >>machine-sensor-2-configmap.properties
-cat machine-sensor-2-configmap.properties
 
-MQTT_HOSTNAME=broker-amq-mqtt-all-0-svc-rte-manuela-stormshift-messaging.apps.ocp3.stormshift.coe.muc.redhat.com
-MQTT_PORT=80
+```bash
+cd ~/manuela-gitops/config/instances/manuela-stormshift-staging-gcp/machine-sensor/
+echo "SENSOR_TEMPERATURE_ENABLED=true" >>machine-sensor-2-configmap.properties
+
+grep SENSOR_TEMPERATURE_ENABLED machine-sensor-2-configmap.properties
 SENSOR_TEMPERATURE_ENABLED=true
 ```
-Commit changes to Git
 
-Similar to Sprint 1
+Commit changes to Git
+```bash
+git add .
+git commit -m "enable sensor 2 temperature probe"
+git push
+```
+
+
+
 
 ### Wait for ArgoCD to sync application / trigger sync for machine-sensor
+see above
 
-Similar to Sprint 1
 
-**TODO - how can this be triggered automatically?**
+### Show that sensor now sends temperature data
 
-(Watch out: on CRC, sometimes this deployment is OOM killed and no change takes place).
+![image alt text](images/line-dashboard-4-metrics.png)
 
-### Show that sensor now sends configuration data
-
-![image alt text](images/image_17.png)
-
-### Review Change History
-
-In the ArgoCD UI, navigate to the machine-sensor application.
-
-![image alt text](images/image_18.png)
-
-Click on the git commit hashcode to open the commit in GitHub.
-
-![image alt text](images/image_19.png)
