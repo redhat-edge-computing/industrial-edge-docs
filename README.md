@@ -109,8 +109,12 @@ $ export MYGITHUBORG=your_github_org_name_here
 $ export MYQUAYORG=your_quay_org_name_here
 $ export MGMT_HUB_NAME=your_mgmt_hub_cluster_name
 $ export MGMT_HUB_DOMAIN=your_mgmt_hub_cluster_domain
+$ export MGMT_HUB_PROJECT_ID=your_mgmt_hub_project_id
+$ export MGMT_HUB_REGION=your_mgmt_hub_region
 $ export EDGE_SITE_NAME=your_edge_cluster_name
 $ export EDGE_SITE_DOMAIN=your_edge_cluster_domain
+$ export EDGE_PROJECT_ID=your_edge_project_id
+$ export EDGE_REGION=your_edge_region
 
 $ export REPOS=("blueprint-management-hub" "blueprint-industrial-edge" "manuela-gitops")
 $ for r in ${REPOS[@]}; do
@@ -119,7 +123,7 @@ $ for r in ${REPOS[@]}; do
         -e "s/github.com\/redhat-edge-computing/github.com\/$MYGITHUBORG/g" \
         -e "s/quay.io\/redhat-edge-computing/quay.io\/$MYQUAYORG/g" \
         -e "s/edge-mgmt-hub.gcp.devcluster.openshift.com/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN/g" \
-        -e "s/staging-edge.gcp.devcluster.openshift.com/$EDGE_NAME.$EDGE_DOMAIN/g" \
+        -e "s/staging-edge.gcp.devcluster.openshift.com/$EDGE_SITE_NAME.$EDGE_SITE_DOMAIN/g" \
         {} \;
 done
 
@@ -155,12 +159,16 @@ Change name and domain of your clusters:
 
 ```
 $ pushd blueprint-management-hub >/dev/null
+$ sed -i -e "s|projectID:.*|projectID: $MGMT_HUB_PROJECT_ID|g" profiles/production.gcp/00_install-config/install-config.patch.yaml
+$ sed -i -e "s|region:.*|region: $MGMT_HUB_REGION|g" profiles/production.gcp/00_install-config/install-config.patch.yaml
 $ git mv sites/edge-mgmt-hub.gcp.devcluster.openshift.com sites/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN
-$ sed -i -e "s|gcp.devcluster.openshift.com|$MGMT_HUB_DOMAIN|g" sites/$MGMT_HUB/00_install-config/install-config.patch.yaml
+$ sed -i -e "s|gcp.devcluster.openshift.com|$MGMT_HUB_DOMAIN|g" sites/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN/00_install-config/install-config.patch.yaml
 $ sed -i -e "s|edge-mgmt-hub|$MGMT_HUB_NAME|g" sites/$MGMT_HUB_NAME.$MGMT_HUB_DOMAIN/00_install-config/install-config.name.patch.yaml
 $ popd >/dev/null
 
 $ pushd blueprint-industrial-edge >/dev/null
+$ sed -i -e "s|projectID:.*|projectID: $EDGE_PROJECT_ID|g" profiles/production.gcp/00_install-config/install-config.patch.yaml
+$ sed -i -e "s|region:.*|region: $EDGE_REGION|g" profiles/production.gcp/00_install-config/install-config.patch.yaml
 $ git mv sites/staging-edge.gcp.devcluster.openshift.com sites/$EDGE_SITE_NAME.$EDGE_SITE_DOMAIN
 $ sed -i -e "s|gcp.devcluster.openshift.com|$EDGE_SITE_DOMAIN|g" sites/$EDGE_SITE_NAME.$EDGE_SITE_DOMAIN/00_install-config/install-config.patch.yaml
 $ sed -i -e "s|staging-edge|$EDGE_SITE_NAME|g" sites/$EDGE_SITE_NAME.$EDGE_SITE_DOMAIN/00_install-config/install-config.name.patch.yaml
